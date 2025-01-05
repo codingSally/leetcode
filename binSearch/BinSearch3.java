@@ -1,5 +1,7 @@
 package binSearch;
 
+import java.util.*;
+
 /**
  * @Description 复杂的二分查找问题
  * @Auther xueshangling
@@ -186,4 +188,175 @@ public class BinSearch3 {
 
         return false;
     }
+
+    // 658. 找到 K 个最接近的元素
+    // 方法一 暴力法
+    public List<Integer> findClosestElements(int[] arr, int k, int x) {
+        int len = arr.length;
+        int[] absArr = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            absArr[i] = Math.abs(arr[i] - x);
+        }
+
+        int index = 0;
+        int min = Integer.MAX_VALUE;
+        ;
+        for (int i = 0; i <= len - k; i++) {
+            int sum = 0;
+            for (int j = 0; j < k; j++) {
+                sum += absArr[i + j];
+            }
+            if (sum < min) {
+                min = sum;
+                index = i;
+            }
+        }
+
+        List<Integer> finalList = new ArrayList<>();
+        for (int i = 0; i < k; i++) {
+            finalList.add(arr[index + i]);
+        }
+
+        return finalList;
+    }
+
+    // 287. 寻找重复数
+    // 方法一  hash表
+    public int findDuplicate1(int[] nums) {
+        int len = nums.length;
+
+        Set<Integer> temp = new HashSet<>();
+        for(int i =0; i <len; i ++) {
+            if(temp.contains(nums[i])) {
+                return nums[i];
+            }
+            temp.add(nums[i]);
+        }
+
+        return -1;
+    }
+
+    // 方法二  暴力解法
+    public int findDuplicate2(int[] nums) {
+        Arrays.sort(nums);
+        int len = nums.length;
+
+        int i = 1;
+        while(i < len) {
+            if(nums[i] == nums[i-1]) {
+                return nums[i];
+            }
+
+            i++;
+        }
+
+        return -1;
+    }
+
+    // 方法三 二分法
+    public int findDuplicate3(int[] nums) {
+        int len = nums.length;
+        int left = 1;
+        int right = len -1;
+        int ans = -1;
+
+        while(left <= right) {
+            int mid  = left +(right -left + 1 ) /2;
+            int count = 0;
+
+            for (int i =0; i <len; i ++) {
+                if(nums[i] <= mid) {
+                    count ++;
+                }
+            }
+
+            if(count <= mid) {
+                left = mid +1;
+            } else {
+                right = mid -1;
+                ans = mid;
+            }
+        }
+
+        return ans;
+    }
+
+    // 1011 在 D 天内送达包裹的能力
+    // 二分法
+    public int shipWithinDays(int[] weights, int days) {
+        int len = weights.length;
+        int left = Arrays.stream(weights).max().getAsInt();
+        int right = Arrays.stream(weights).sum();
+
+        while(left <= right) {
+            int mid = left + (right - left + 1) /2;
+            int count = getCount(weights, mid);
+
+            if(count > days) {
+                left = mid +1;
+            } else {
+                right = mid -1;
+            }
+        }
+
+        return left;
+    }
+
+    private int getCount(int[] weights, int curWei) {
+        int count = 1;
+
+        int sum = 0;
+        for(int weight : weights) {
+            if(sum + weight > curWei) {
+                count ++;
+                sum =0;
+            }
+
+            sum += weight;
+        }
+
+        return count;
+    }
+
+    // 1482 制作 m 束花所需的最少天数
+    public int minDays(int[] bloomDay, int m, int k) {
+        int len = bloomDay.length;
+        if (m > len / k) {
+            return -1;
+        }
+        int left = Arrays.stream(bloomDay).min().getAsInt();
+        int right = Arrays.stream(bloomDay).max().getAsInt();
+
+        while(left <= right) {
+            int mid = left + (right - left + 1) /2;
+
+            if(getCount(bloomDay, mid, m, k) >= m) {
+                right = mid -1;
+            } else {
+                left = mid +1;
+            }
+        }
+
+        return left;
+    }
+
+    public int getCount(int[] bloomDay, int days, int m, int k) {
+        int bouquets = 0;
+        int flowers = 0;
+        int length = bloomDay.length;
+        for (int i = 0; i < length && bouquets < m; i++) {
+            if (bloomDay[i] <= days) {
+                flowers++;
+                if (flowers == k) {
+                    bouquets++;
+                    flowers = 0;
+                }
+            } else {
+                flowers = 0;
+            }
+        }
+        return bouquets;
+    }
+
 }
